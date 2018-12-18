@@ -1,5 +1,1 @@
-﻿  Server.cpp
-c:\users\cisra\desktop\mrkirm1\vezbe\vezba 5 - ipv6\dualstack_tcp(one_socket)\dualstack_tcp(one socket)\server\server.cpp(130): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-  c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1848): note: see declaration of 'inet_ntoa'
-Server.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
-  Server.vcxproj -> C:\Users\Cisra\Desktop\MRKiRM1\vezbe\vezba 5 - IPv6\DualStack_TCP(one_socket)\DualStack_TCP(one socket)\Debug\Server.exe
+﻿
