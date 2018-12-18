@@ -73,6 +73,50 @@ int main()
     }
     puts("Connected to remote server.\n");
 
+    listen(clientSocket, SOMAXCONN); // Listen on serverSocket, maximum queue is a reasonable number
+
+                                     // Declare and initialize client address that will be set from recvfrom
+    sockaddr_in6 clientAddress;
+    memset(&clientAddress, 0, sizeof(clientAddress));
+
+    // size of client address
+    sockAddrLen = sizeof(clientAddress);
+
+    SOCKET serverSocket = accept(clientSocket, (struct sockaddr *)&clientAddress, (socklen_t*)&sockAddrLen);
+
+    printf("SERVER:\n");
+
+    if (clientSocket < 0) {
+        perror("accept failed");
+        return 1;
+    }
+    else {
+        printf("Connection accepted.\n");
+    }
+
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
+    iResult = recvfrom(clientSocket,						// Own socket
+        dataBuffer,							// Buffer that will be used for receiving message
+        BUFFER_SIZE,						// Maximal size of buffer
+        0,									// No flags
+        (struct sockaddr *)&clientAddress,	// Client information from received message (ip address and port)
+        &sockAddrLen);						// Size of sockadd_in structure
+
+
+                                            // Check if message is succesfully received
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("recv failed with error: %d\n", WSAGetLastError());
+        return 1;
+    }
+    else
+    {
+        printf("%s\n\n", dataBuffer);
+    }
+
+
 	while(1)
 	{
 		printf("Enter message to send:\n");

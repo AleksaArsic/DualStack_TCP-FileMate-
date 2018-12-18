@@ -16,16 +16,23 @@
 #define SERVER_PORT 27015	// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512		// Size of buffer that will be used for sending and receiving messages to clients
 
-// Checks if ip address belongs to IPv4 address family
-bool is_ipV4_address(sockaddr_in6 address);
+#define SERVER_READY "Server ready for transfer." // Indicates that server is ready for file transfer
 
-int main()
+struct threadData {
+    SOCKET clientSocket;
+    sockaddr_in6 clientAddress;
+    int sockAddrLen;
+};
+
+// Checks if ip address belongs to IPv4 address family
+bool is_ipV4_address (sockaddr_in6 address);
+// Thread for every new connection 
+DWORD WINAPI SystemThread (void* data);
+
+int main ()
 {
     // Server address 
      sockaddr_in6 serverAddress; 
-
-	// Buffer we will use to send and receive clients' messages
-    char dataBuffer[BUFFER_SIZE];
 
 	// WSADATA data structure that is to receive details of the Windows Sockets implementation
     WSADATA wsaData;
@@ -75,20 +82,24 @@ int main()
         return 1;
     }
 
-    listen(serverSocket, SOMAXCONN); // ADDED
+    listen(serverSocket, SOMAXCONN); // Listen on serverSocket, maximum queue is a reasonable number
 
 	printf("Simple TCP server waiting client messages.\n");
 
     // Main server loop
     while(1)
     {
+        // Thread handlers
+        DWORD threadId;
+        HANDLE threadHandle;
+
+        // Thread parameter
+        struct threadData tData;
+
         // Declare and initialize client address that will be set from recvfrom
         sockaddr_in6 clientAddress;
 		memset(&clientAddress, 0, sizeof(clientAddress));
-
-		// Set whole buffer to zero
-        memset(dataBuffer, 0, BUFFER_SIZE);
-
+        
 		// size of client address
 		int sockAddrLen = sizeof(clientAddress);
 
@@ -102,37 +113,14 @@ int main()
             printf("Connection accepted.\n");
         }
 
-		// Receive client message
-        iResult = recv(clientSocket, dataBuffer, BUFFER_SIZE, 0);
+        tData.clientSocket = clientSocket;
+        tData.clientAddress = clientAddress;
+        tData.sockAddrLen = sockAddrLen;
+	
+        threadHandle = CreateThread(NULL, 0, SystemThread, (LPVOID) &tData, 0, &threadId);
 
-		// Check if message is succesfully received
-		if (iResult == SOCKET_ERROR)    
-		{
-			printf("recv failed with error: %d\n", WSAGetLastError());
-			continue;
-		}
-
-        char ipAddress[INET6_ADDRSTRLEN]; // INET6_ADDRSTRLEN 65 spaces for hexadecimal notation of IPv6
-		
-		// Copy client ip to local char[]
-		inet_ntop(clientAddress.sin6_family, &clientAddress.sin6_addr, ipAddress, sizeof(ipAddress));
-        
-		// Convert port number from network byte order to host byte order
-        unsigned short clientPort = ntohs(clientAddress.sin6_port);
-
-		bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
-
-		if(isIPv4){
-			char ipAddress1[15]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
-			struct in_addr *ipv4 = (struct in_addr*)&((char*)&clientAddress.sin6_addr.u)[12]; 
-			
-			// Copy client ip to local char[]
-			strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa( *ipv4 ));
-			printf("IPv4 Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress1, clientPort, dataBuffer);
-		}else
-			printf("IPv6 Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
-		
-		// Possible server-shutdown logic could be put here
+        // Possible server-shutdown logic could be put here
+        //CloseHandle(threadHandle);
     }
 
     // Close server application
@@ -152,7 +140,7 @@ int main()
 	return 0;
 }
 
-bool is_ipV4_address(sockaddr_in6 address)
+bool is_ipV4_address (sockaddr_in6 address)
 {
 	char *check = (char*)&address.sin6_addr.u;
 
@@ -164,4 +152,88 @@ bool is_ipV4_address(sockaddr_in6 address)
 		return false;
 
 	return true;
+}
+
+DWORD WINAPI SystemThread (void* data)
+{
+    int iResult;
+
+    struct threadData* tData = (struct threadData *) data;
+    SOCKET clientSocket = tData->clientSocket;
+    sockaddr_in6 clientAddress = tData->clientAddress;
+    int sockAddrLen = tData->sockAddrLen;
+
+    // Buffer we will use to send and receive clients' messages
+    char dataBuffer[BUFFER_SIZE];
+
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+    // Copy SERVER_READY info to dataBuffer
+    strcpy(dataBuffer, SERVER_READY);
+
+    // Send message to client
+    iResult = sendto(clientSocket,						// Own socket
+                        dataBuffer,						// Text of message
+                        strlen(dataBuffer),				// Message size
+                        0,								// No flags
+                        (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
+                        sizeof(clientAddress));			// Size of sockadr_in structure
+
+    // Check if message is succesfully sent. If not, close client/server session
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("sendto failed with error: %d\n", WSAGetLastError());
+        closesocket(clientSocket);
+        WSACleanup();
+        ExitThread(100);
+        return 1;
+    }
+
+
+    while (1)
+    {
+
+        // Set whole buffer to zero
+        memset(dataBuffer, 0, BUFFER_SIZE);
+
+        iResult = recvfrom(clientSocket,						// Own socket
+                            dataBuffer,							// Buffer that will be used for receiving message
+                            BUFFER_SIZE,						// Maximal size of buffer
+                            0,									// No flags
+                            (struct sockaddr *)&clientAddress,	// Client information from received message (ip address and port)
+                            &sockAddrLen);						// Size of sockadd_in structure
+
+
+        // Check if message is succesfully received
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("recv failed with error: %d\n", WSAGetLastError());
+            ExitThread(100);
+            return 1;
+        }
+
+        char ipAddress[INET6_ADDRSTRLEN]; // INET6_ADDRSTRLEN 65 spaces for hexadecimal notation of IPv6
+
+        // Copy client ip to local char[]
+        inet_ntop(clientAddress.sin6_family, &clientAddress.sin6_addr, ipAddress, sizeof(ipAddress));
+
+        // Convert port number from network byte order to host byte order
+        unsigned short clientPort = ntohs(clientAddress.sin6_port);
+
+        bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
+
+        if (isIPv4) {
+            char ipAddress1[15]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
+            struct in_addr *ipv4 = (struct in_addr*)&((char*)&clientAddress.sin6_addr.u)[12];
+
+            // Copy client ip to local char[]
+            strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa(*ipv4));
+            printf("IPv4 Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress1, clientPort, dataBuffer);
+        }
+        else
+            printf("IPv6 Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
+
+    }
+
+    return 0;
 }
