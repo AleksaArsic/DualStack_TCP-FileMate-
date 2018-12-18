@@ -1,0 +1,3 @@
+﻿  Client_IPv6.cpp
+Client_IPv6.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  Client_IPv6.vcxproj -> C:\Users\Cisra\Desktop\MRKiRM1\vezbe\vezba 5 - IPv6\DualStack_TCP(one_socket)\DualStack_TCP(one socket)\Debug\Client_IPv6.exe

@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Server\Server.vcxproj", "{8E1F10CC-F286-4CB1-BB93-439F19799777}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client_IPv6", "Client_IPv6\Client_IPv6.vcxproj", "{B0CEE9FD-D049-4BFB-ACA2-73118775B29C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client_IPv4", "Client_IPv4\Client_IPv4.vcxproj", "{58A93005-5880-4753-9D61-D556FA928F3F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E1F10CC-F286-4CB1-BB93-439F19799777}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8E1F10CC-F286-4CB1-BB93-439F19799777}.Debug|Win32.Build.0 = Debug|Win32
+		{8E1F10CC-F286-4CB1-BB93-439F19799777}.Release|Win32.ActiveCfg = Release|Win32
+		{8E1F10CC-F286-4CB1-BB93-439F19799777}.Release|Win32.Build.0 = Release|Win32
+		{B0CEE9FD-D049-4BFB-ACA2-73118775B29C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B0CEE9FD-D049-4BFB-ACA2-73118775B29C}.Debug|Win32.Build.0 = Debug|Win32
+		{B0CEE9FD-D049-4BFB-ACA2-73118775B29C}.Release|Win32.ActiveCfg = Release|Win32
+		{B0CEE9FD-D049-4BFB-ACA2-73118775B29C}.Release|Win32.Build.0 = Release|Win32
+		{58A93005-5880-4753-9D61-D556FA928F3F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{58A93005-5880-4753-9D61-D556FA928F3F}.Debug|Win32.Build.0 = Debug|Win32
+		{58A93005-5880-4753-9D61-D556FA928F3F}.Release|Win32.ActiveCfg = Release|Win32
+		{58A93005-5880-4753-9D61-D556FA928F3F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
