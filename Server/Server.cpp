@@ -17,6 +17,7 @@
 #define BUFFER_SIZE 512		// Size of buffer that will be used for sending and receiving messages to clients
 
 #define SERVER_READY "Server ready for transfer." // Indicates that server is ready for file transfer
+#define FILE_NAME "transfer\\output.dat" // location and name of file for transfering
 
 struct threadData {
     SOCKET clientSocket;
@@ -193,7 +194,7 @@ DWORD WINAPI SystemThread (void* data)
         return 1;
     }
 
-    filePtr = fopen("transfer\\output2.dat", "r");
+    filePtr = fopen(FILE_NAME, "r");
 
     // Set whole buffer to zero
     memset(dataBuffer, 0, BUFFER_SIZE);
@@ -223,20 +224,25 @@ DWORD WINAPI SystemThread (void* data)
 
         // Set whole buffer to zero
         memset(dataBuffer, 0, BUFFER_SIZE);
+
     }
 
     strcpy(dataBuffer, "EOF\0");
-    puts(dataBuffer);
+    printf("\n%s\n", dataBuffer);
+
+    // Sleep thread so the client side can flush input stream
+    // before "EOF\0" is sent
+    Sleep(2000);
 
     // Send message to client
     iResult = sendto(clientSocket,						// Own socket
-        dataBuffer,						// Text of message
-        strlen(dataBuffer),				// Message size
-        0,								// No flags
-        (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
-        sizeof(clientAddress));			// Size of sockadr_in structure
+                        dataBuffer,						// Text of message
+                        strlen(dataBuffer),				// Message size
+                        0,								// No flags
+                        (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
+                        sizeof(clientAddress));			// Size of sockadr_in structure
 
-                                        // Check if message is succesfully sent. If not, close client/server session
+    // Check if message is succesfully sent. If not, close client/server session
     if (iResult == SOCKET_ERROR)
     {
         printf("sendto failed with error: %d\n", WSAGetLastError());
@@ -248,7 +254,6 @@ DWORD WINAPI SystemThread (void* data)
 
     // Set whole buffer to zero
     memset(dataBuffer, 0, BUFFER_SIZE);
-
 
     fclose(filePtr);
 

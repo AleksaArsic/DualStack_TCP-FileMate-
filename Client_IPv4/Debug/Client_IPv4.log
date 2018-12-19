@@ -1,7 +1,7 @@
 ﻿  Client_IPv4.cpp
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(63): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(67): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1830): note: see declaration of 'inet_addr'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(126): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(132): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
 Client_IPv4.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Client_IPv4.vcxproj -> C:\Users\Cisra\OneDrive\Faks\DualStack_TCP(one socket)\Debug\Client_IPv4.exe

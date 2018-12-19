@@ -17,6 +17,10 @@
 #define SERVER_PORT 27015					// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512						// Size of buffer that will be used for sending and receiving messages to client
 
+#define FILE_NAME "received\\output.dat" // location and name of file for receiveing
+
+// remove output file from received folder
+void removeFile();
 
 int main()
 {
@@ -122,8 +126,10 @@ int main()
 
     FILE* filePtr;
 
-    // TO-DO: Remove if existing 
-    filePtr = fopen("received\\input.dat", "w");
+    // Remove file if existing in received\\ directory 
+    removeFile();
+
+    filePtr = fopen(FILE_NAME, "w");
 
     int isEOF = 0;
     do {
@@ -202,4 +208,17 @@ int main()
 
 	// Client has succesfully sent a message
     return 0;
+}
+
+void removeFile ()
+{
+    int status = remove(FILE_NAME);
+
+    if (status == 0)
+        printf("%s file deleted successfully.\n", FILE_NAME);
+    else
+    {
+        printf("Unable to delete the file\n");
+        perror("Following error occurred");
+    }
 }
