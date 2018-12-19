@@ -64,9 +64,8 @@ int main()
     serverAddress.sin6_port = htons(SERVER_PORT);						// Set server port
 	serverAddress.sin6_flowinfo = 0;									// flow info
 	 
-    int err = 0;
     //Connect to remote server
-    if (err = connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+    if (connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
         perror("connect failed. Error");
         return 1;
@@ -75,7 +74,7 @@ int main()
 
     listen(clientSocket, SOMAXCONN); // Listen on serverSocket, maximum queue is a reasonable number
 
-                                     // Declare and initialize client address that will be set from recvfrom
+    // Declare and initialize client address that will be set from recvfrom
     sockaddr_in6 clientAddress;
     memset(&clientAddress, 0, sizeof(clientAddress));
 
@@ -98,14 +97,14 @@ int main()
     memset(dataBuffer, 0, BUFFER_SIZE);
 
     iResult = recvfrom(clientSocket,						// Own socket
-        dataBuffer,							// Buffer that will be used for receiving message
-        BUFFER_SIZE,						// Maximal size of buffer
-        0,									// No flags
-        (struct sockaddr *)&clientAddress,	// Client information from received message (ip address and port)
-        &sockAddrLen);						// Size of sockadd_in structure
+                        dataBuffer,							// Buffer that will be used for receiving message
+                        BUFFER_SIZE,						// Maximal size of buffer
+                        0,									// No flags
+                        (struct sockaddr *)&clientAddress,	// Client information from received message (ip address and port)
+                        &sockAddrLen);						// Size of sockadd_in structure
 
 
-                                            // Check if message is succesfully received
+    // Check if message is succesfully received
     if (iResult == SOCKET_ERROR)
     {
         printf("recv failed with error: %d\n", WSAGetLastError());
@@ -116,7 +115,47 @@ int main()
         printf("%s\n\n", dataBuffer);
     }
 
+    /* RECEIVE CHUNKS OF DATA */
 
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
+    FILE* filePtr;
+
+    // TO-DO: Remove if existing 
+    filePtr = fopen("received\\inputIPv6.dat", "w");
+
+    int isEOF = 0;
+    do {
+        // Set whole buffer to zero
+        memset(dataBuffer, 0, BUFFER_SIZE);
+
+        iResult = recvfrom(clientSocket,						// Own socket
+                            dataBuffer,							// Buffer that will be used for receiving message
+                            BUFFER_SIZE,						// Maximal size of buffer
+                            0,									// No flags
+                            (struct sockaddr *)&clientAddress,	// Client information from received message (ip address and port)
+                            &sockAddrLen);						// Size of sockadd_in structure
+
+        // Check if message is succesfully received
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("recv failed with error: %d\n", WSAGetLastError());
+            return 1;
+        }
+
+        isEOF = strcmp(dataBuffer, "EOF\0");
+
+        if (isEOF != 0)
+        {
+            fprintf(filePtr, "%s", dataBuffer);
+        }
+
+    }while (isEOF);
+
+    fclose(filePtr);
+
+#if 0
 	while(1)
 	{
 		printf("Enter message to send:\n");
@@ -141,6 +180,8 @@ int main()
 			return 1;
 		}
 	}
+#endif
+
 	// Only for demonstration purpose
 	printf("Press any key to exit: ");
 	_getch();

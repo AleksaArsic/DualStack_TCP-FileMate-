@@ -1,3 +1,5 @@
 ﻿  Client_IPv6.cpp
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv6\client_ipv6.cpp(126): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
 Client_IPv6.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Client_IPv6.vcxproj -> C:\Users\Cisra\OneDrive\Faks\DualStack_TCP(one socket)\Debug\Client_IPv6.exe

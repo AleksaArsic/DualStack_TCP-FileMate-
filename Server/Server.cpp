@@ -156,8 +156,12 @@ bool is_ipV4_address (sockaddr_in6 address)
 
 DWORD WINAPI SystemThread (void* data)
 {
+    // File operators 
+    FILE* filePtr;
+
     int iResult;
 
+    // Unpack void* data structure 
     struct threadData* tData = (struct threadData *) data;
     SOCKET clientSocket = tData->clientSocket;
     sockaddr_in6 clientAddress = tData->clientAddress;
@@ -189,7 +193,66 @@ DWORD WINAPI SystemThread (void* data)
         return 1;
     }
 
+    filePtr = fopen("transfer\\output2.dat", "r");
 
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
+    while (fgets(dataBuffer, BUFFER_SIZE, filePtr) != NULL)
+    {
+
+        printf("%s", dataBuffer);
+
+        // Send message to client
+        iResult = sendto(clientSocket,						// Own socket
+                            dataBuffer,						// Text of message
+                            strlen(dataBuffer),				// Message size
+                            0,								// No flags
+                            (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
+                            sizeof(clientAddress));			// Size of sockadr_in structure
+
+        // Check if message is succesfully sent. If not, close client/server session
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("sendto failed with error: %d\n", WSAGetLastError());
+            closesocket(clientSocket);
+            WSACleanup();
+            ExitThread(100);
+            return 1;
+        }
+
+        // Set whole buffer to zero
+        memset(dataBuffer, 0, BUFFER_SIZE);
+    }
+
+    strcpy(dataBuffer, "EOF\0");
+    puts(dataBuffer);
+
+    // Send message to client
+    iResult = sendto(clientSocket,						// Own socket
+        dataBuffer,						// Text of message
+        strlen(dataBuffer),				// Message size
+        0,								// No flags
+        (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
+        sizeof(clientAddress));			// Size of sockadr_in structure
+
+                                        // Check if message is succesfully sent. If not, close client/server session
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("sendto failed with error: %d\n", WSAGetLastError());
+        closesocket(clientSocket);
+        WSACleanup();
+        ExitThread(100);
+        return 1;
+    }
+
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
+
+    fclose(filePtr);
+
+#if 0
     while (1)
     {
 
@@ -234,6 +297,8 @@ DWORD WINAPI SystemThread (void* data)
             printf("IPv6 Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, dataBuffer);
 
     }
+
+#endif
 
     return 0;
 }
