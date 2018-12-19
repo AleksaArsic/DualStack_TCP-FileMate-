@@ -151,44 +151,23 @@ int main()
             return 1;
         }
 
+        // Write to file 
         isEOF = strcmp(dataBuffer, "EOF\0");
 
         if (isEOF != 0)
         {
-            fprintf(filePtr, "%s", dataBuffer);
+            int i = 0;
+
+            while ( (iResult--) > 0)
+            {
+                fprintf(filePtr, "%c", dataBuffer[i++]);
+
+            }
         }
 
     }while (isEOF);
 
     fclose(filePtr); 
-
-#if 0
-	while(1)
-    {
-		printf("Enter message to send:\n");
-
-		// Read string from user into outgoing buffer
-		gets_s(dataBuffer, BUFFER_SIZE);
-	
-		// Send message to server
-		iResult = sendto(clientSocket,						// Own socket
-						 dataBuffer,						// Text of message
-						 strlen(dataBuffer),				// Message size
-						 0,									// No flags
-						 (SOCKADDR *)&serverAddress,		// Address structure of server (type, IP address and port)
-						 sizeof(serverAddress));			// Size of sockadr_in structure
-
-		// Check if message is succesfully sent. If not, close client application
-		if (iResult == SOCKET_ERROR)
-		{
-			printf("sendto failed with error: %d\n", WSAGetLastError());
-			closesocket(clientSocket);
-			WSACleanup();
-			return 1;
-		}
-	}
-
-#endif
 
 	// Only for demonstration purpose
 	printf("Press any key to exit: ");
