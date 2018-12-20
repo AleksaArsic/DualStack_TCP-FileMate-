@@ -9,14 +9,13 @@
 #include <stdio.h>
 #include "conio.h"
 
-#include <deque>
-
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
 #define SERVER_PORT 27015	// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512		// Size of buffer that will be used for sending and receiving messages to clients
+#define SEND_DENOM 4        // How much parts will sending file have
 
 #define SERVER_READY "Server ready for transfer." // Indicates that server is ready for file transfer
 #define FILE_NAME "transfer\\output.dat" // location and name of file for transfering
@@ -38,9 +37,8 @@ unsigned long long int fileSize ( FILE* filePtr);
 
 int main ()
 {
-
     // Server address 
-     sockaddr_in6 serverAddress; 
+    sockaddr_in6 serverAddress; 
 
 	// WSADATA data structure that is to receive details of the Windows Sockets implementation
     WSADATA wsaData;
@@ -128,7 +126,6 @@ int main ()
         threadHandle = CreateThread(NULL, 0, SystemThread, (LPVOID) &tData, 0, &threadId);
 
         // Possible server-shutdown logic could be put here
-        //CloseHandle(threadHandle);
     }
 
     // Close server application
@@ -204,46 +201,92 @@ DWORD WINAPI SystemThread (void* data)
         ExitThread(100);
     }
 
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
+    iResult = recvfrom(clientSocket,						// Own socket
+                        dataBuffer,							// Buffer that will be used for receiving message
+                        BUFFER_SIZE,						// Maximal size of buffer
+                        0,									// No flags
+                        (struct sockaddr *)&clientAddress,	// Client information from received message (ip address and port)
+                        &sockAddrLen);						// Size of sockadd_in structure
+
+
+    // Check if message is succesfully received
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("recv failed with error: %d\n", WSAGetLastError());
+        return 1;
+    }
+
+    // Part of file to send to client
+    int partToSend = dataBuffer[0] - '0';
+
+    Sleep(500);
+
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
     // Open file for reading
     filePtr = fopen(FILE_NAME, "r");
+
+    if (filePtr == NULL)
+    {
+        printf("Error opening file.\n");
+        ExitThread(100);
+    }
 
     // Retreive file size
     fSize = fileSize(filePtr);
 
     // How much bytes to send
-    leftToSend = fSize / 4;
+    leftToSend = fSize / SEND_DENOM;
+
+    int fpOffset = leftToSend * (partToSend - 1);
+
+    fseek(filePtr, fpOffset, SEEK_SET);
+
+    int i = 0;
+    char cFromFile;
+
+    while(leftToSend != 0 || feof(filePtr))
+    {
+
+        cFromFile = fgetc(filePtr);
+        dataBuffer[i++] = cFromFile;
+
+        leftToSend--;
+        bytesSent++;
+
+        if (strlen(dataBuffer) == (BUFFER_SIZE - 1) || leftToSend == 0)
+        {
+            // Send message to client
+            iResult = sendto(clientSocket,						// Own socket
+                                dataBuffer,						// Text of message
+                                strlen(dataBuffer),				// Message size
+                                0,								// No flags
+                                (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
+                                sizeof(clientAddress));			// Size of sockadr_in structure
+
+            // Check if message is succesfully sent. If not, close client/server session
+            if (iResult == SOCKET_ERROR)
+            {
+                printf("sendto failed with error: %d\n", WSAGetLastError());
+                closesocket(clientSocket);
+                WSACleanup();
+                ExitThread(100);
+            }
+
+            // Set whole buffer to zero
+            memset(dataBuffer, 0, BUFFER_SIZE);
+
+            i = 0;
+        }
+
+    }
 
     // Set whole buffer to zero
     memset(dataBuffer, 0, BUFFER_SIZE);
-
-    while (fgets(dataBuffer, BUFFER_SIZE, filePtr) != NULL)
-    {
-        if (leftToSend <= 0) break;
-
-        leftToSend -= strlen(dataBuffer);
-        bytesSent += strlen(dataBuffer);
-
-        // Send message to client
-        iResult = sendto(clientSocket,						// Own socket
-                            dataBuffer,						// Text of message
-                            strlen(dataBuffer),				// Message size
-                            0,								// No flags
-                            (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
-                            sizeof(clientAddress));			// Size of sockadr_in structure
-
-        // Check if message is succesfully sent. If not, close client/server session
-        if (iResult == SOCKET_ERROR)
-        {
-            printf("sendto failed with error: %d\n", WSAGetLastError());
-            closesocket(clientSocket);
-            WSACleanup();
-            ExitThread(100);
-        }
-
-        // Set whole buffer to zero
-        memset(dataBuffer, 0, BUFFER_SIZE);
-
-    }
 
     strcpy(dataBuffer, "EOF\0");
 
@@ -299,7 +342,7 @@ void printSentInfo (const sockaddr_in6 clientAddress, const float bytesSent)
 
         // Copy client ip to local char[]
         strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa(*ipv4));
-        printf("IPv4 Client connected from ip: %s, port: %d, received: %.2f kB.\n", ipAddress1, clientPort, bytesSent / 1024);
+        printf("IPv4 Client connected from ip: %s, port: %d, received: %.2f kB.\n", ipAddress1, clientPort, bytesSent / 1024 );
     }
     else
         printf("IPv6 Client connected from ip: %s, port: %d, received: %.2f kB.\n", ipAddress, clientPort, bytesSent / 1024);

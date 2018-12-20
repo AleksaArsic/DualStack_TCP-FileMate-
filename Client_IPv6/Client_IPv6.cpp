@@ -16,11 +16,17 @@
 #define SERVER_IP_ADDRESS "0:0:0:0:0:0:0:1"	// IPv6 address of server in localhost
 #define SERVER_PORT 27015					// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512						// Size of buffer that will be used for sending and receiving messages to client
+#define NAME_BUF_SIZE 26                   // Size of file name buffer
 
 #define FILE_NAME "received\\output.dat" // location and name of file for receiveing
 
-// remove output file from received folder
+// Removes output file from received folder
 void removeFile();
+// Generates file name
+void fileNameGen(char* fileName, int partToRecv);
+
+// Name of the file
+char fileName[NAME_BUF_SIZE];
 
 int main()
 {
@@ -119,6 +125,42 @@ int main()
         printf("%s\n\n", dataBuffer);
     }
 
+
+    // Part of file to receive
+    int partToRecv = 0;
+
+    // Set whole buffer to zero
+    memset(fileName, 0, NAME_BUF_SIZE);
+
+    printf("Enter part of the file to recieve: ");
+    scanf("%d", &partToRecv);
+
+    // Set whole buffer to zero
+    memset(dataBuffer, 0, BUFFER_SIZE);
+
+    dataBuffer[0] = partToRecv + '0';
+
+    // Send message to server
+    iResult = sendto(clientSocket,						// Own socket
+        dataBuffer,						// Text of message
+        strlen(dataBuffer),				// Message size
+        0,								// No flags
+        (SOCKADDR *)&clientAddress,		// Address structure of server (type, IP address and port)
+        sizeof(clientAddress));			// Size of sockadr_in structure
+
+                                        // Check if message is succesfully sent. If not, close client/server session
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("sendto failed with error: %d\n", WSAGetLastError());
+        closesocket(clientSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    fileNameGen(fileName, partToRecv);
+
+    printf("Filename: %s\n", fileName);
+
     /* RECEIVE CHUNKS OF DATA */
 
     // Set whole buffer to zero
@@ -129,7 +171,7 @@ int main()
     // Remove file if existing in received\\ directory 
     removeFile();
 
-    filePtr = fopen(FILE_NAME, "w");
+    filePtr = fopen(fileName, "w");
 
     int isEOF = 0;
     do {
@@ -190,13 +232,26 @@ int main()
 
 void removeFile()
 {
-    int status = remove(FILE_NAME);
+    int status = remove(fileName);
 
     if (status == 0)
-        printf("%s file deleted successfully.\n", FILE_NAME);
+        printf("%s file deleted successfully.\n", fileName);
     else
     {
         printf("Unable to delete the file\n");
         perror("Following error occurred");
     }
+}
+
+void fileNameGen(char* fileName, int partToRecv)
+{
+    strcpy(fileName, FILE_NAME);
+
+    const char partBuff[5] = { '.', 'p', 'a', 'r', 't' };
+
+    const char partToRecvC = partToRecv + '0';
+
+    strcat(fileName, partBuff);
+    fileName[24] = partToRecv + '0';
+    fileName[25] = 0;
 }

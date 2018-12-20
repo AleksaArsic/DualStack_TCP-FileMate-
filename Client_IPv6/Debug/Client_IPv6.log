@@ -1,5 +1,11 @@
 ﻿  Client_IPv6.cpp
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv6\client_ipv6.cpp(132): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv6\client_ipv6.cpp(136): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(1272): note: see declaration of 'scanf'
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv6\client_ipv6.cpp(174): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv6\client_ipv6.cpp(248): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(132): note: see declaration of 'strcpy'
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv6\client_ipv6.cpp(254): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(89): note: see declaration of 'strcat'
 Client_IPv6.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Client_IPv6.vcxproj -> C:\Users\Cisra\OneDrive\Faks\DualStack_TCP(one socket)\Debug\Client_IPv6.exe
