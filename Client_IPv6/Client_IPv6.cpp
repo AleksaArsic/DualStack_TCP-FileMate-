@@ -1,4 +1,4 @@
-// UDP client that uses blocking sockets
+// TCP client that uses blocking sockets
 
 #define WIN32_LEAN_AND_MEAN
 

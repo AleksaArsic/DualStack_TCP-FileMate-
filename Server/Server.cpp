@@ -1,4 +1,4 @@
-// UDP server that use blocking sockets
+// TCP server that use blocking sockets
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -19,7 +19,7 @@
 #define BUFFER_SIZE 512		// Size of buffer that will be used for sending and receiving messages to clients
 
 #define SERVER_READY "Server ready for transfer." // Indicates that server is ready for file transfer
-#define FILE_NAME "transfer\\output2.dat" // location and name of file for transfering
+#define FILE_NAME "transfer\\output.dat" // location and name of file for transfering
 
 struct threadData {
     SOCKET clientSocket;
@@ -33,9 +33,12 @@ DWORD WINAPI SystemThread(void* data);
 bool is_ipV4_address (sockaddr_in6 address);
 // Print information to whom file is sent
 void printSentInfo (const sockaddr_in6 clientAddress, const float bytesReceived);
+// Return file size 
+unsigned long long int fileSize ( FILE* filePtr);
 
 int main ()
 {
+
     // Server address 
      sockaddr_in6 serverAddress; 
 
@@ -164,6 +167,8 @@ DWORD WINAPI SystemThread (void* data)
     // File operators 
     FILE* filePtr;
     float bytesSent = 0;
+    unsigned long long fSize = 0;
+    long long leftToSend = 0;
 
     // Result of sendto operation 
     int iResult;
@@ -199,14 +204,23 @@ DWORD WINAPI SystemThread (void* data)
         ExitThread(100);
     }
 
+    // Open file for reading
     filePtr = fopen(FILE_NAME, "r");
+
+    // Retreive file size
+    fSize = fileSize(filePtr);
+
+    // How much bytes to send
+    leftToSend = fSize / 4;
 
     // Set whole buffer to zero
     memset(dataBuffer, 0, BUFFER_SIZE);
 
     while (fgets(dataBuffer, BUFFER_SIZE, filePtr) != NULL)
     {
+        if (leftToSend <= 0) break;
 
+        leftToSend -= strlen(dataBuffer);
         bytesSent += strlen(dataBuffer);
 
         // Send message to client
@@ -285,9 +299,20 @@ void printSentInfo (const sockaddr_in6 clientAddress, const float bytesSent)
 
         // Copy client ip to local char[]
         strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa(*ipv4));
-        printf("IPv4 Client connected from ip: %s, port: %d, received: %f kB.\n", ipAddress1, clientPort, bytesSent / 1024);
+        printf("IPv4 Client connected from ip: %s, port: %d, received: %.2f kB.\n", ipAddress1, clientPort, bytesSent / 1024);
     }
     else
-        printf("IPv6 Client connected from ip: %s, port: %d, received: %f kB.\n", ipAddress, clientPort, bytesSent / 1024);
+        printf("IPv6 Client connected from ip: %s, port: %d, received: %.2f kB.\n", ipAddress, clientPort, bytesSent / 1024);
 
+}
+
+unsigned long long int fileSize (FILE* filePtr)
+{
+    unsigned long long int fSize = 0;
+
+    fseek(filePtr, 0, SEEK_END);
+    fSize = ftell(filePtr);
+    rewind(filePtr);
+
+    return fSize;
 }
