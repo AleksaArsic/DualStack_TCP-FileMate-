@@ -240,7 +240,14 @@ DWORD WINAPI SystemThread (void* data)
     fSize = fileSize(filePtr);
 
     // How much bytes to send
-    leftToSend = fSize / SEND_DENOM;
+    if (fSize >= 4)
+    {
+        leftToSend = fSize / SEND_DENOM;
+    }
+    else
+    {
+        leftToSend = fSize;
+    }
 
     int fpOffset = leftToSend * (partToSend - 1);
 
@@ -249,11 +256,13 @@ DWORD WINAPI SystemThread (void* data)
     int i = 0;
     char cFromFile;
 
-    while(leftToSend != 0 || feof(filePtr))
+    while(leftToSend != 0)
     {
 
         cFromFile = fgetc(filePtr);
         dataBuffer[i++] = cFromFile;
+
+        if (cFromFile == '\n') leftToSend--;
 
         leftToSend--;
         bytesSent++;
@@ -282,6 +291,8 @@ DWORD WINAPI SystemThread (void* data)
 
             i = 0;
         }
+
+       // if (feof(filePtr)) break;
 
     }
 
