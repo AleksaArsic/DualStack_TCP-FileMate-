@@ -33,7 +33,9 @@ bool is_ipV4_address (sockaddr_in6 address);
 // Print information to whom file is sent
 void printSentInfo (const sockaddr_in6 clientAddress, const float bytesReceived);
 // Return file size 
-unsigned long long int fileSize ( FILE* filePtr);
+unsigned long long int fileSize (FILE* filePtr);
+// Return remainder of the division when dividing file size on smaller packets
+int fileRemainder (unsigned long long int toSend, unsigned long long int fileSize);
 
 int main ()
 {
@@ -239,10 +241,17 @@ DWORD WINAPI SystemThread (void* data)
     // Retreive file size
     fSize = fileSize(filePtr);
 
+    int fRemainder = 0;
+
     // How much bytes to send
-    if (fSize >= 4)
+    if (fSize >= SEND_DENOM)
     {
         leftToSend = fSize / SEND_DENOM;
+        fRemainder = fileRemainder(leftToSend, fSize);
+        if (partToSend == SEND_DENOM && fRemainder != 0)
+        {
+            leftToSend += fRemainder;
+        }
     }
     else
     {
@@ -291,9 +300,6 @@ DWORD WINAPI SystemThread (void* data)
 
             i = 0;
         }
-
-       // if (feof(filePtr)) break;
-
     }
 
     // Set whole buffer to zero
@@ -369,4 +375,15 @@ unsigned long long int fileSize (FILE* filePtr)
     rewind(filePtr);
 
     return fSize;
+}
+
+int fileRemainder (unsigned long long int toSend, unsigned long long int fileSize)
+{
+    int remainder = 0;
+    unsigned long long int fileSizeCalc = 0;
+
+    fileSizeCalc = toSend * SEND_DENOM;
+    remainder = fileSize - fileSizeCalc;
+
+    return remainder;
 }
