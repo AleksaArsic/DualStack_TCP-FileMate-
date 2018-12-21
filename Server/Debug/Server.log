@@ -1,13 +1,19 @@
 ﻿  Server.cpp
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(261): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(187): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(313): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(219): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(132): note: see declaration of 'strcpy'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(233): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(282): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(308): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(400): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(132): note: see declaration of 'strcpy'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(361): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(453): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1848): note: see declaration of 'inet_ntoa'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(386): warning C4244: '=': conversion from 'unsigned __int64' to 'int', possible loss of data
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(478): warning C4244: '=': conversion from 'unsigned __int64' to 'int', possible loss of data
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(498): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1848): note: see declaration of 'inet_ntoa'
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(586): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1848): note: see declaration of 'inet_ntoa'
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(597): warning C4715: 'findIPv4Connection': not all control paths return a value
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(615): warning C4715: 'findIPv6Connection': not all control paths return a value
 Server.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Server.vcxproj -> C:\Users\Cisra\OneDrive\Faks\DualStack_TCP(one socket)\Debug\Server.exe

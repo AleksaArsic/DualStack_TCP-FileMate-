@@ -202,7 +202,6 @@ int main()
             while ( (iResult--) > 0)
             {
                 fprintf(filePtr, "%c", dataBuffer[i++]);
-
             }
         }
 

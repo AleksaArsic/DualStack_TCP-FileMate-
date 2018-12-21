@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "conio.h"
+#include <deque>
+#include <mutex>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -16,15 +18,37 @@
 #define SERVER_PORT 27015	// Port number of server that will be used for communication with clients
 #define BUFFER_SIZE 512		// Size of buffer that will be used for sending and receiving messages to clients
 #define SEND_DENOM 4        // How much parts will sending file have
+#define IPv4_ADDR_LEN 15    // IPv4 address length
+#define THREAD_SLEEP 200   // Thread sleep coeficient, determines the speed of file transfer
 
 #define SERVER_READY "Server ready for transfer." // Indicates that server is ready for file transfer
 #define FILE_NAME "transfer\\output.dat" // location and name of file for transfering
 
+// Data to be available to threads
 struct threadData {
     SOCKET clientSocket;
     sockaddr_in6 clientAddress;
     int sockAddrLen;
 };
+
+// Active connections by one IPv4 address
+struct aConnectionsIPv4 {
+    char clientAddress[IPv4_ADDR_LEN];
+    unsigned int opConnections;
+};
+
+// Active connections by one IPv6 address
+struct aConnectionsIPv6 {
+    char clientAddress[INET6_ADDRSTRLEN];
+    unsigned int opConnections;
+};
+
+// Deques of active connections
+std::deque<aConnectionsIPv4> IPv4Connections;
+std::deque<aConnectionsIPv6> IPv6Connections;
+
+// Mutex for critical sections
+std::mutex dequeMutex;
 
 // Processing thread
 DWORD WINAPI SystemThread(void* data);
@@ -36,6 +60,12 @@ void printSentInfo (const sockaddr_in6 clientAddress, const float bytesReceived)
 unsigned long long int fileSize (FILE* filePtr);
 // Return remainder of the division when dividing file size on smaller packets
 int fileRemainder (unsigned long long int toSend, unsigned long long int fileSize);
+// Add new connection to the deque of active connections
+int addConnection (sockaddr_in6 clientAddress);
+// Find connection in deque of IPv4 active connections
+aConnectionsIPv4 findIPv4Connection (sockaddr_in6 clientAddress);
+// Find connection in deque of IPv6 active connections
+aConnectionsIPv6 findIPv6Connection (sockaddr_in6 clientAddress);
 
 int main ()
 {
@@ -171,6 +201,8 @@ DWORD WINAPI SystemThread (void* data)
 
     // Result of sendto operation 
     int iResult;
+    // Result of adding new connection to deque
+    int dequeRes;
 
     // Unpack void* data structure 
     struct threadData* tData = (struct threadData *) data;
@@ -200,6 +232,23 @@ DWORD WINAPI SystemThread (void* data)
         printf("sendto failed with error: %d\n", WSAGetLastError());
         closesocket(clientSocket);
         WSACleanup();
+        ExitThread(100);
+    }
+
+    // TO-DO: Add IP address to the deque of active connections
+    // if IP address is the same as one in the deque increment opConnections field
+    // do not forget to check after transmitting of data is this connection is the last one opened 
+    // if it is remove IP address from the deque
+
+    // Add IP address to dequeu of active connections (either IPv4 or IPv6)
+    // This is a critical section
+    dequeMutex.lock();
+    dequeRes = addConnection(clientAddress);
+    dequeMutex.unlock();
+
+    if (dequeRes)
+    {
+        printf("Error! Something wrong with IP address.\n");
         ExitThread(100);
     }
 
@@ -241,15 +290,18 @@ DWORD WINAPI SystemThread (void* data)
     // Retreive file size
     fSize = fileSize(filePtr);
 
+    // File size remainder
     int fRemainder = 0;
 
     // How much bytes to send
     if (fSize >= SEND_DENOM)
     {
         leftToSend = fSize / SEND_DENOM;
-        fRemainder = fileRemainder(leftToSend, fSize);
+        
+        // Calculate and set remainder only if it is the last part of the file to transfer 
         if (partToSend == SEND_DENOM && fRemainder != 0)
         {
+            fRemainder = fileRemainder(leftToSend, fSize);
             leftToSend += fRemainder;
         }
     }
@@ -258,7 +310,7 @@ DWORD WINAPI SystemThread (void* data)
         leftToSend = fSize;
     }
 
-    int fpOffset = leftToSend * (partToSend - 1);
+    int fpOffset = (leftToSend - fRemainder) * (partToSend - 1);
 
     fseek(filePtr, fpOffset, SEEK_SET);
 
@@ -278,6 +330,35 @@ DWORD WINAPI SystemThread (void* data)
 
         if (strlen(dataBuffer) == (BUFFER_SIZE - 1) || leftToSend == 0)
         {
+            unsigned int aConnections = 1;
+
+            bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
+
+            // Find how many connections are open from one IP address
+            // This is a critical section
+            if (isIPv4)
+            {
+                aConnectionsIPv4 thisConnection;
+
+                dequeMutex.lock();
+                thisConnection = findIPv4Connection(clientAddress);
+                aConnections = thisConnection.opConnections;
+                dequeMutex.unlock();
+            }
+            else
+            {
+                aConnectionsIPv6 thisConnection;
+
+                dequeMutex.lock();
+                thisConnection = findIPv6Connection(clientAddress);
+                aConnections = thisConnection.opConnections;
+                dequeMutex.unlock();
+            }
+
+            // The speed of transfer is determined by how long the thread will sleep 
+            Sleep(THREAD_SLEEP / aConnections);
+            sleepCounter = 0;
+
             // Send message to client
             iResult = sendto(clientSocket,						// Own socket
                                 dataBuffer,						// Text of message
@@ -354,7 +435,7 @@ void printSentInfo (const sockaddr_in6 clientAddress, const float bytesSent)
     bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
 
     if (isIPv4) {
-        char ipAddress1[15]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
+        char ipAddress1[IPv4_ADDR_LEN]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
         struct in_addr *ipv4 = (struct in_addr*)&((char*)&clientAddress.sin6_addr.u)[12];
 
         // Copy client ip to local char[]
@@ -386,4 +467,138 @@ int fileRemainder (unsigned long long int toSend, unsigned long long int fileSiz
     remainder = fileSize - fileSizeCalc;
 
     return remainder;
+}
+
+int addConnection (sockaddr_in6 clientAddress)
+{
+    char ipAddress[INET6_ADDRSTRLEN]; // INET6_ADDRSTRLEN 65 spaces for hexadecimal notation of IPv6
+
+    // Copy client ip to local char[]
+    inet_ntop(clientAddress.sin6_family, &clientAddress.sin6_addr, ipAddress, sizeof(ipAddress));
+
+    bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
+
+    if (isIPv4)
+    {
+        char ipAddress1[IPv4_ADDR_LEN]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
+        struct in_addr *ipv4 = (struct in_addr*)&((char*)&clientAddress.sin6_addr.u)[12];
+
+        // Copy client ip to local char[]
+        strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa(*ipv4));
+
+        if (IPv4Connections.empty())
+        {
+            // Copy client ip to new connection
+            aConnectionsIPv4 connectionIPv4;
+
+            strcpy_s(connectionIPv4.clientAddress, sizeof(connectionIPv4.clientAddress), ipAddress1);
+            connectionIPv4.opConnections = 1;
+
+            // Add new connection do deque
+            IPv4Connections.push_front(connectionIPv4);
+
+            return 0;
+        }
+
+        // Iterate trough connections and add new one or update existing
+        std::deque<aConnectionsIPv4>::iterator it;
+
+        for (it = IPv4Connections.begin(); it != IPv4Connections.end(); it++)
+        {
+            if (!(strcmp((*it).clientAddress, ipAddress1)))
+            {
+                (*it).opConnections++;
+                return 0;
+            }
+        }
+        
+        // Copy client ip to new connection
+        aConnectionsIPv4 connectionIPv4;
+
+        strcpy_s(connectionIPv4.clientAddress, sizeof(connectionIPv4.clientAddress), ipAddress1);
+        connectionIPv4.opConnections = 1;
+
+        // Add new connection do deque
+        IPv4Connections.push_front(connectionIPv4);
+
+        return 0;
+    }
+    else
+    {
+        if (IPv6Connections.empty())
+        {
+            // Copy client ip to new connection
+            aConnectionsIPv6 connectionIPv6;
+
+            strcpy_s(connectionIPv6.clientAddress, sizeof(connectionIPv6.clientAddress), ipAddress);
+            connectionIPv6.opConnections = 1;
+
+            // Add new connection do deque
+            IPv6Connections.push_front(connectionIPv6);
+
+            return 0;
+        }
+
+        // Iterate trough connections and add new one or update existing
+        std::deque<aConnectionsIPv6>::iterator it;
+
+        for (it = IPv6Connections.begin(); it != IPv6Connections.end(); it++)
+        {
+            if (!(strcmp((*it).clientAddress, ipAddress)))
+            {
+                (*it).opConnections++;
+                return 0;
+            }
+        }
+
+        // Copy client ip to new connection
+        aConnectionsIPv6 connectionIPv6;
+
+        strcpy_s(connectionIPv6.clientAddress, sizeof(connectionIPv6.clientAddress), ipAddress);
+        connectionIPv6.opConnections = 1;
+
+        // Add new connection do deque
+        IPv6Connections.push_front(connectionIPv6);
+
+        return 0;
+    }
+
+    return 1;
+}
+
+aConnectionsIPv4 findIPv4Connection (sockaddr_in6 clientAddress)
+{
+    char ipAddress1[IPv4_ADDR_LEN]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
+    struct in_addr *ipv4 = (struct in_addr*)&((char*)&clientAddress.sin6_addr.u)[12];
+
+    // Copy client ip to local char[]
+    strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa(*ipv4));
+
+    std::deque<aConnectionsIPv4>::iterator it;
+
+    for (it = IPv4Connections.begin(); it != IPv4Connections.end(); it++)
+    {
+        if (!(strcmp((*it).clientAddress, ipAddress1)))
+        {
+            return *it;
+        }
+    }
+}
+
+aConnectionsIPv6 findIPv6Connection(sockaddr_in6 clientAddress)
+{
+    char ipAddress[INET6_ADDRSTRLEN]; // INET6_ADDRSTRLEN 65 spaces for hexadecimal notation of IPv6
+
+    // Copy client ip to local char[]
+    inet_ntop(clientAddress.sin6_family, &clientAddress.sin6_addr, ipAddress, sizeof(ipAddress));
+
+    std::deque<aConnectionsIPv6>::iterator it;
+
+    for (it = IPv6Connections.begin(); it != IPv6Connections.end(); it++)
+    {
+        if (!(strcmp((*it).clientAddress, ipAddress)))
+        {
+            return *it;
+        }
+    }
 }
