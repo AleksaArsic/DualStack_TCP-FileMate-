@@ -66,6 +66,10 @@ int addConnection (sockaddr_in6 clientAddress);
 aConnectionsIPv4 findIPv4Connection (sockaddr_in6 clientAddress);
 // Find connection in deque of IPv6 active connections
 aConnectionsIPv6 findIPv6Connection (sockaddr_in6 clientAddress);
+// Find connection in deque of IPv4 active connections and return its index
+unsigned int findIPv4ConnectionIndex (sockaddr_in6 clientAddress);
+// Find connection in deque of IPv6 active connections and return its index
+unsigned int findIPv6ConnectionIndex (sockaddr_in6 clientAddress);
 
 int main ()
 {
@@ -317,6 +321,9 @@ DWORD WINAPI SystemThread (void* data)
     int i = 0;
     char cFromFile;
 
+    bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
+
+    // Send Processing
     while(leftToSend != 0)
     {
 
@@ -331,8 +338,6 @@ DWORD WINAPI SystemThread (void* data)
         if (strlen(dataBuffer) == (BUFFER_SIZE - 1) || leftToSend == 0)
         {
             unsigned int aConnections = 1;
-
-            bool isIPv4 = is_ipV4_address(clientAddress); //true for IPv4 and false for IPv6
 
             // Find how many connections are open from one IP address
             // This is a critical section
@@ -357,7 +362,6 @@ DWORD WINAPI SystemThread (void* data)
 
             // The speed of transfer is determined by how long the thread will sleep 
             Sleep(THREAD_SLEEP / aConnections);
-            sleepCounter = 0;
 
             // Send message to client
             iResult = sendto(clientSocket,						// Own socket
@@ -414,6 +418,49 @@ DWORD WINAPI SystemThread (void* data)
 
     fclose(filePtr);
 
+    // Find this connection in deque and remove it (or decrement opConnections counter)
+    unsigned int connectionIndex = 0;
+
+    if (isIPv4)
+    {
+        aConnectionsIPv4 thisConnection;
+
+        dequeMutex.lock();
+        connectionIndex = findIPv4ConnectionIndex(clientAddress);
+        
+        // Check if there is more than one connection from the same IP address
+        if (IPv4Connections[connectionIndex].opConnections < 2)
+        {
+            IPv4Connections.erase(IPv4Connections.begin() + connectionIndex);
+        }
+        else
+        {
+            IPv4Connections[connectionIndex].opConnections--;
+        }
+
+        dequeMutex.unlock();
+    }
+    else
+    {
+        aConnectionsIPv6 thisConnection;
+
+        dequeMutex.lock();
+        connectionIndex = findIPv6ConnectionIndex(clientAddress);
+        
+        // Check if there is more than one connection from the same IP address
+        if (IPv6Connections[connectionIndex].opConnections < 2)
+        {
+            IPv6Connections.erase(IPv6Connections.begin() + connectionIndex);
+        }
+        else
+        {
+            IPv6Connections[connectionIndex].opConnections--;
+        }
+
+        dequeMutex.unlock();
+    }
+
+
     // Print client information
     printSentInfo(clientAddress, bytesSent);
 
@@ -423,7 +470,6 @@ DWORD WINAPI SystemThread (void* data)
 
 void printSentInfo (const sockaddr_in6 clientAddress, const float bytesSent)
 {
-
     char ipAddress[INET6_ADDRSTRLEN]; // INET6_ADDRSTRLEN 65 spaces for hexadecimal notation of IPv6
 
     // Copy client ip to local char[]
@@ -599,6 +645,45 @@ aConnectionsIPv6 findIPv6Connection(sockaddr_in6 clientAddress)
         if (!(strcmp((*it).clientAddress, ipAddress)))
         {
             return *it;
+        }
+    }
+}
+
+unsigned int findIPv4ConnectionIndex (sockaddr_in6 clientAddress)
+{
+    char ipAddress1[IPv4_ADDR_LEN]; // 15 spaces for decimal notation (for example: "192.168.100.200") + '\0'
+    struct in_addr *ipv4 = (struct in_addr*)&((char*)&clientAddress.sin6_addr.u)[12];
+
+    // Copy client ip to local char[]
+    strcpy_s(ipAddress1, sizeof(ipAddress1), inet_ntoa(*ipv4));
+
+    std::deque<aConnectionsIPv4>::iterator it;
+
+    for (it = IPv4Connections.begin(); it != IPv4Connections.end(); it++)
+    {
+        if (!(strcmp((*it).clientAddress, ipAddress1)))
+        {
+            int index = std::distance(IPv4Connections.begin(), it);
+            return index;
+        }
+    }
+}
+
+unsigned int findIPv6ConnectionIndex (sockaddr_in6 clientAddress)
+{
+    char ipAddress[INET6_ADDRSTRLEN]; // INET6_ADDRSTRLEN 65 spaces for hexadecimal notation of IPv6
+
+                                      // Copy client ip to local char[]
+    inet_ntop(clientAddress.sin6_family, &clientAddress.sin6_addr, ipAddress, sizeof(ipAddress));
+
+    std::deque<aConnectionsIPv6>::iterator it;
+
+    for (it = IPv6Connections.begin(); it != IPv6Connections.end(); it++)
+    {
+        if (!(strcmp((*it).clientAddress, ipAddress)))
+        {
+            int index = std::distance(IPv6Connections.begin(), it);
+            return index;
         }
     }
 }
