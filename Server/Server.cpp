@@ -314,7 +314,7 @@ DWORD WINAPI SystemThread (void* data)
         leftToSend = fSize;
     }
 
-    int fpOffset = (leftToSend - fRemainder) * (partToSend - 1);
+    unsigned int fpOffset = (leftToSend - fRemainder) * (partToSend - 1);
 
     fseek(filePtr, fpOffset, SEEK_SET);
 
@@ -667,6 +667,7 @@ unsigned int findIPv4ConnectionIndex (sockaddr_in6 clientAddress)
             return index;
         }
     }
+    return -1;
 }
 
 unsigned int findIPv6ConnectionIndex (sockaddr_in6 clientAddress)
@@ -686,4 +687,5 @@ unsigned int findIPv6ConnectionIndex (sockaddr_in6 clientAddress)
             return index;
         }
     }
+    return -1;
 }

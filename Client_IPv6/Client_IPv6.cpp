@@ -1,4 +1,4 @@
-// TCP client that uses blocking sockets
+﻿// TCP client that uses blocking sockets
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "conio.h"
+#include <deque>
+#include <iterator>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -19,17 +21,31 @@
 #define NAME_BUF_SIZE 26                   // Size of file name buffer
 
 #define FILE_NAME "received\\output.dat" // location and name of file for receiveing
+#define FILE_FOLDER "received\\output.*"            // Folder to search for files
+#define DOWN_NAME "received\\downloaded.dat" // Downloaded data
 
 // Removes output file from received folder
-void removeFile();
+void removeFile(const char* fileName);
 // Generates file name
 void fileNameGen(char* fileName, int partToRecv);
+// Return names of the files in folder
+std::deque<const char*> getFileNamesFromFolder(const char* folder);
+// Merge received files
+bool mergeFiles(std::deque<const char*> fileNames);
 
 // Name of the file
-char fileName[NAME_BUF_SIZE];
+char outputFileName[NAME_BUF_SIZE];
+// File names in folder recieved
+std::deque<const char*> fileNames;
 
 int main()
 {
+
+    fileNames = getFileNamesFromFolder(FILE_FOLDER);
+
+    bool isMerged = mergeFiles(fileNames);
+
+
     // Server address structure
     sockaddr_in6 serverAddress;
 
@@ -130,7 +146,7 @@ int main()
     int partToRecv = 0;
 
     // Set whole buffer to zero
-    memset(fileName, 0, NAME_BUF_SIZE);
+    memset(outputFileName, 0, NAME_BUF_SIZE);
 
     printf("Enter part of the file to recieve: ");
     scanf("%d", &partToRecv);
@@ -157,9 +173,9 @@ int main()
         return 1;
     }
 
-    fileNameGen(fileName, partToRecv);
+    fileNameGen(outputFileName, partToRecv);
 
-    printf("Filename: %s\n", fileName);
+    printf("Filename: %s\n", outputFileName);
 
     /* RECEIVE CHUNKS OF DATA */
 
@@ -169,9 +185,9 @@ int main()
     FILE* filePtr;
 
     // Remove file if existing in received\\ directory 
-    removeFile();
+    removeFile(outputFileName);
 
-    filePtr = fopen(fileName, "w");
+    filePtr = fopen(outputFileName, "w");
 
     int isEOF = 0;
     do {
@@ -230,7 +246,7 @@ int main()
     return 0;
 }
 
-void removeFile()
+void removeFile(const char* fileName)
 {
     int status = remove(fileName);
 
@@ -243,6 +259,7 @@ void removeFile()
     }
 }
 
+
 void fileNameGen(char* fileName, int partToRecv)
 {
     strcpy(fileName, FILE_NAME);
@@ -254,4 +271,69 @@ void fileNameGen(char* fileName, int partToRecv)
     strcat(fileName, partBuff);
     fileName[24] = partToRecv + '0';
     fileName[25] = 0;
+}
+
+std::deque<const char*> getFileNamesFromFolder(const char* folder)
+{
+    WIN32_FIND_DATAA FindFileData;
+    HANDLE hFind;
+
+    std::deque<const char*> fileNames;
+
+    hFind = FindFirstFileA(folder, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        printf("FindFirstFile failed (%d)\n", GetLastError());
+    }
+    else
+    {
+        do
+        {
+            char* name = (char*)malloc(strlen(FindFileData.cFileName) * sizeof(char));
+            strcpy(name, FindFileData.cFileName);
+
+            fileNames.push_back(name);
+
+        } while (FindNextFileA(hFind, &FindFileData) != 0);
+
+        FindClose(hFind);
+    }
+
+    return fileNames;
+}
+
+bool mergeFiles(std::deque<const char*> fileNames)
+{
+    FILE* outputFilePtr;
+    std::deque<const char*>::iterator it;
+
+    removeFile(DOWN_NAME);
+
+    // Open output file
+    outputFilePtr = fopen(DOWN_NAME, "a");
+
+    for (it = fileNames.begin(); it != fileNames.end(); it++)
+    {
+        char* fileName = (char*)malloc(strlen(*it) * sizeof(char) + 10);
+
+        strcpy(fileName, "received\\");
+        strcat(fileName, *it);
+
+        FILE* filePtr = fopen(fileName, "r");
+        char cFromFile;
+
+        while ((cFromFile = fgetc(filePtr)) != EOF)
+        {
+            fputc(cFromFile, outputFilePtr);
+            //printf("%c", cFromFile);
+        }
+
+
+        fclose(filePtr);
+
+    }
+
+    fclose(outputFilePtr);
+
+    return true;
 }
