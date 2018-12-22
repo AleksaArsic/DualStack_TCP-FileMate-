@@ -1,23 +1,23 @@
 ﻿  Client_IPv4.cpp
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(87): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(66): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1830): note: see declaration of 'inet_addr'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(149): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(129): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(1272): note: see declaration of 'scanf'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(187): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(167): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(261): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(269): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(132): note: see declaration of 'strcpy'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(267): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(275): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(89): note: see declaration of 'strcat'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(289): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(297): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(132): note: see declaration of 'strcpy'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(309): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(317): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(315): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(323): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(132): note: see declaration of 'strcpy'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(316): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(324): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\string.h(89): note: see declaration of 'strcat'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(318): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\client_ipv4\client_ipv4.cpp(326): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
 Client_IPv4.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Client_IPv4.vcxproj -> C:\Users\Cisra\OneDrive\Faks\DualStack_TCP(one socket)\Debug\Client_IPv4.exe

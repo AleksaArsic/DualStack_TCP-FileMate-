@@ -2,49 +2,24 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "conio.h"
-#include <deque>
-#include <iterator>
+#include "Client_IPv6.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
-#define SERVER_IP_ADDRESS "0:0:0:0:0:0:0:1"	// IPv6 address of server in localhost
-#define SERVER_PORT 27015					// Port number of server that will be used for communication with clients
-#define BUFFER_SIZE 512						// Size of buffer that will be used for sending and receiving messages to client
-#define NAME_BUF_SIZE 26                   // Size of file name buffer
-
-#define FILE_NAME "received\\output.dat" // location and name of file for receiveing
-#define FILE_FOLDER "received\\output.*"            // Folder to search for files
-#define DOWN_NAME "received\\downloaded.dat" // Downloaded data
-
-// Removes output file from received folder
-void removeFile(const char* fileName);
-// Generates file name
-void fileNameGen(char* fileName, int partToRecv);
-// Return names of the files in folder
-std::deque<const char*> getFileNamesFromFolder(const char* folder);
-// Merge received files
-bool mergeFiles(std::deque<const char*> fileNames);
-
-// Name of the file
-char outputFileName[NAME_BUF_SIZE];
-// File names in folder recieved
-std::deque<const char*> fileNames;
-
 int main()
 {
+    // File names in folder recieved
+    std::deque<const char*> fileNames;
 
-    fileNames = getFileNamesFromFolder(FILE_FOLDER);
+    // Indicates of how much parts data consists
+    int noOfFiles = 0;
 
-    bool isMerged = mergeFiles(fileNames);
-
+    // Part of file to receive
+    int partToRecv = 0;
 
     // Server address structure
     sockaddr_in6 serverAddress;
@@ -58,6 +33,8 @@ int main()
 	// WSADATA data structure that is used to receive details of the Windows Sockets implementation
     WSADATA wsaData;
     
+    printf("%s\n\n", CLIENT_DESC);
+
 	// Initialize windows sockets for this process
 	int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
     
@@ -116,7 +93,7 @@ int main()
         return 1;
     }
     else {
-        printf("Connection accepted.\n");
+        printf("[*] Connection accepted.\n");
     }
 
     // Set whole buffer to zero
@@ -130,7 +107,7 @@ int main()
                         &sockAddrLen);						// Size of sockadd_in structure
 
 
-    // Check if message is succesfully received
+     // Check if message is succesfully received
     if (iResult == SOCKET_ERROR)
     {
         printf("recv failed with error: %d\n", WSAGetLastError());
@@ -138,18 +115,20 @@ int main()
     }
     else
     {
-        printf("%s\n\n", dataBuffer);
+        printf("[*] %s\n", SERVER_READY);
+        printf("[*] Data you are trying to download consists of: %s files.\n\n", dataBuffer);
+
+        noOfFiles = dataBuffer[0] - '0';
     }
-
-
-    // Part of file to receive
-    int partToRecv = 0;
 
     // Set whole buffer to zero
     memset(outputFileName, 0, NAME_BUF_SIZE);
-
-    printf("Enter part of the file to recieve: ");
-    scanf("%d", &partToRecv);
+ 
+    do {
+        printf("Enter part of the file to recieve: ");
+        scanf("%d", &partToRecv);
+        printf("\n");
+    } while (partToRecv > noOfFiles || partToRecv <= 0);
 
     // Set whole buffer to zero
     memset(dataBuffer, 0, BUFFER_SIZE);
@@ -175,8 +154,6 @@ int main()
 
     fileNameGen(outputFileName, partToRecv);
 
-    printf("Filename: %s\n", outputFileName);
-
     /* RECEIVE CHUNKS OF DATA */
 
     // Set whole buffer to zero
@@ -189,7 +166,10 @@ int main()
 
     filePtr = fopen(outputFileName, "w");
 
+    printf("\nDownloading...\n");
+
     int isEOF = 0;
+
     do {
         // Set whole buffer to zero
         memset(dataBuffer, 0, BUFFER_SIZE);
@@ -226,9 +206,7 @@ int main()
 
     fclose(filePtr);
 
-	// Only for demonstration purpose
-	printf("Press any key to exit: ");
-	_getch();
+    printf("\n[*] Download complete.\n");
 
 	// Close client application
     iResult = closesocket(clientSocket);
@@ -238,6 +216,33 @@ int main()
 		WSACleanup();
         return 1;
     }
+
+    // Merge files if all parts of data are received
+    fileNames = getFileNamesFromFolder(FILE_FOLDER);
+
+    if (fileNames.size() == noOfFiles)
+    {
+        printf("[*] Merging downloaded files...\n\n");
+
+        bool isMerged = mergeFiles(fileNames);
+
+        if (isMerged)
+        {
+            printf("\n[*] Downloading and Merging completed.\n");
+        }
+        else
+        {
+            printf("\n[*] Merging failed.\n");
+            return 1;
+        }
+    }
+
+    // Only for demonstration purpose
+    printf("\nPress any key to exit: ");
+    _getch();
+
+    // Clear deque
+    fileNames.clear();
 
 	// Close Winsock library
     WSACleanup();
