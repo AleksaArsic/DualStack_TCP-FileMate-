@@ -172,6 +172,14 @@ int main()
 
     printf("\nDownloading...\n");
 
+    /* Time measurement */
+    clock_t startTime;
+    clock_t endTime;
+
+    double timeUsed;
+
+    startTime = clock();
+
     int isEOF = 0;
 
     do {
@@ -209,6 +217,11 @@ int main()
     }while (isEOF);
 
     fclose(filePtr);
+
+    endTime = clock();
+    timeUsed = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
+
+    printf("\n[*] Time used for download: %f\n", timeUsed);
 
     printf("\n[*] Download complete.\n");
 

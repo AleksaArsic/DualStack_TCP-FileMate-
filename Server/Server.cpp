@@ -300,7 +300,7 @@ DWORD WINAPI SystemThread (void* data)
             }
 
             // The speed of transfer is determined by how long the thread will sleep 
-            //Sleep(THREAD_SLEEP / aConnections);
+            Sleep(THREAD_SLEEP / aConnections);
 
             // Send message to client
             iResult = sendto(clientSocket,						// Own socket

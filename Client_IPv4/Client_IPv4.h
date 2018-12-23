@@ -6,6 +6,7 @@
 #include "conio.h"
 #include <deque>
 #include <iterator>
+#include <time.h>
 
 #define CLIENT_DESC "FileMate Client - a simple file sharing application" // Description of application
 

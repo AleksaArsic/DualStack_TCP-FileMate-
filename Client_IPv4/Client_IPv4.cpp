@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "Client_IPv4.h"
 
+
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
@@ -169,6 +170,14 @@ int main()
 
     printf("\nDownloading...\n");
 
+    /* Time measurement */
+    clock_t startTime;
+    clock_t endTime;
+
+    double timeUsed;
+
+    startTime = clock();
+
     int isEOF = 0;
 
     do {
@@ -207,7 +216,12 @@ int main()
 
     fclose(filePtr); 
 
-    printf("\n[*] Download complete.\n");
+    endTime = clock();
+    timeUsed = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
+
+    printf("\n[*] Time used for download: %f\n", timeUsed);
+
+    printf("[*] Download complete.\n");
 
 	// Close client application
     iResult = closesocket(clientSocket);

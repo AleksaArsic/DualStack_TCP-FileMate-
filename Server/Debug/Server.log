@@ -17,7 +17,7 @@ c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(560): w
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1848): note: see declaration of 'inet_ntoa'
 c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(597): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\um\winsock2.h(1848): note: see declaration of 'inet_ntoa'
-c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(589): warning C4715: 'findIPv6Connection': not all control paths return a value
 c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(571): warning C4715: 'findIPv4Connection': not all control paths return a value
+c:\users\cisra\onedrive\faks\dualstack_tcp(one socket)\server\server.cpp(589): warning C4715: 'findIPv6Connection': not all control paths return a value
 Server.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Server.vcxproj -> C:\Users\Cisra\OneDrive\Faks\DualStack_TCP(one socket)\Debug\Server.exe
