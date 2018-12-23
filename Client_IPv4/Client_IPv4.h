@@ -28,6 +28,8 @@ void fileNameGen(char* fileName, int partToRecv);
 std::deque<const char*> getFileNamesFromFolder(const char* folder);
 // Merge received files
 bool mergeFiles(std::deque<const char*> fileNames);
+// Delete all temporary files after merge process
+bool deleteTempFiles (std::deque<const char*> fileNames);
 
 // Name of the file
 char outputFileName[NAME_BUF_SIZE];

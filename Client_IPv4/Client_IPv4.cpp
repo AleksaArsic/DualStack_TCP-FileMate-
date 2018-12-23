@@ -57,7 +57,6 @@ int main()
         return 1;
     }
 
-
     // Initialize memory for address structure
     memset((char*)&serverAddress, 0, sizeof(serverAddress));		
     
@@ -74,8 +73,10 @@ int main()
     }
     puts("Connected to remote server.\n");
 
+    // Bind server address structure (type, port number and local address) to socket
+    iResult = bind(clientSocket, (SOCKADDR *)&serverAddress, sizeof(serverAddress));
 
-    listen(clientSocket, SOMAXCONN); // Listen on serverSocket, maximum queue is a reasonable number
+    listen(clientSocket, SOMAXCONN); // Listen on clientSocket, maximum queue is a reasonable number
 
     // Declare and initialize client address that will be set from recvfrom
     sockaddr_in6 clientAddress;
@@ -88,7 +89,7 @@ int main()
 
     printf("SERVER:\n");
 
-    if (clientSocket < 0) {
+    if (serverSocket < 0) {
         perror("accept failed");
         return 1;
     }
@@ -228,7 +229,9 @@ int main()
 
         if (isMerged)
         {
-            printf("\n[*] Downloading and Merging completed.\n");
+            printf("\n[*] Downloading and Merging completed.\n\n");
+
+            deleteTempFiles(fileNames);
         }
         else 
         {
@@ -338,6 +341,24 @@ bool mergeFiles (std::deque<const char*> fileNames)
     }
 
     fclose(outputFilePtr);
+
+    return true;
+}
+
+bool deleteTempFiles (std::deque<const char*> fileNames)
+{
+    std::deque<const char*>::iterator it;
+
+    for (it = fileNames.begin(); it != fileNames.end(); ++it)
+    {
+        char* fileName = (char*)malloc(strlen(*it) * sizeof(char) + 10);
+
+        strcpy(fileName, "received\\");
+        strcat(fileName, *it);
+
+        removeFile(fileName);
+
+    }
 
     return true;
 }
