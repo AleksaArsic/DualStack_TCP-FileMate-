@@ -230,7 +230,7 @@ DWORD WINAPI SystemThread (void* data)
         ExitThread(100);
     }
 
-    // Retreive file size
+    // Retrieve file size
     fSize = fileSize(filePtr);
 
     // File size remainder
