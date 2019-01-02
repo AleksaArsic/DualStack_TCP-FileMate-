@@ -333,7 +333,7 @@ DWORD WINAPI SystemThread (void* data)
 
     // Sleep thread so the client side can flush input stream
     // before "EOF\0" is sent
-    Sleep(2000);
+    Sleep(THREAD_SLEEP * 10);
 
     // Send message to client
     iResult = sendto(clientSocket,						// Own socket
